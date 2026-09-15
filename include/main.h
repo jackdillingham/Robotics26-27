@@ -38,6 +38,7 @@
 #include "robodash/api.h" // IWYU pragma: keep
 
 #include "autons.hpp" // IWYU pragma: keep
+#include "localization.hpp" // IWYU pragma: keep
 
 
 /**
