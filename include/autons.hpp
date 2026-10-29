@@ -3,7 +3,7 @@
 
 #include "lemlib/api.hpp" // IWYU pragma: keep
 
-static void pid_setup();
+void pid_setup();
 
 extern lemlib::Chassis chassis;
 

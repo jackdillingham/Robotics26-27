@@ -2,13 +2,43 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include <algorithm> // IWYU pragma: keep
 
+///
+// PORTS
+///
+
+// drive
+#define BRD_PORT 2
+#define MRD_PORT 3
+#define FRD_PORT 4
+#define BLD_PORT -5
+#define MLD_PORT -6
+#define FLD_PORT -7
+
+// lift
+#define LIFTL_PORT 11
+#define LIFTR_PORT 11
+
+// odom
+#define H_ODOM_PORT 16
+#define V_ODOM_PORT 15
+
+// intake
+#define INTAKE_PORT 17  // NOT CODED
+
+// pnuematics
+#define CLAW_OPEN_PORT 'A'
+#define CLAW_DOWN_PORT 'B'
+
+
+
+
 // controller
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 // left motor group
-pros::MotorGroup left_motor_group({-1, 2, -3}, pros::MotorGears::blue);
+pros::MotorGroup left_motor_group({BLD_PORT, MLD_PORT, FLD_PORT}, pros::MotorGears::blue);
 // right motor group
-pros::MotorGroup right_motor_group({4, -5, 6}, pros::MotorGears::green);
+pros::MotorGroup right_motor_group({BRD_PORT, MRD_PORT, FRD_PORT}, pros::MotorGears::green);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motor_group, // left motor group
@@ -23,9 +53,9 @@ lemlib::Drivetrain drivetrain(&left_motor_group, // left motor group
 pros::Imu imu(10);
 
 // horizontal tracking wheel encoder
-pros::Rotation horizontal_encoder(20);
+pros::Rotation horizontal_encoder(H_ODOM_PORT);
 // vertical tracking wheel encoder
-pros::Rotation vertical_encoder(19);
+pros::Rotation vertical_encoder(V_ODOM_PORT);
 
 // horizontal tracking wheel
 lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_275, -5.75);
@@ -71,6 +101,18 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
                         sensors // odometry sensors
 );
 
+pros::MotorGroup lift({LIFTL_PORT, LIFTR_PORT}, pros::MotorGears::red);
+
+pros::Distance distFront(12);
+pros::Distance distBack(13);
+pros::Distance distLeft(14);
+pros::Distance distRight(18);
+
+pros::adi::DigitalOut claw_open(CLAW_OPEN_PORT, false);
+pros::adi::DigitalOut claw_down(CLAW_DOWN_PORT, false);
+
+
+
 
 rd::Selector selector({
     {"Red Right", Autons::RedRight, "", 0},
@@ -83,7 +125,11 @@ rd::Selector selector({
 rd::Console console;
 
 void run_selected_auto(lv_event_t *) {
-    selector.run_auton();
+    //selector.run_auton();
+
+    claw_open.set_value(false);
+    pros::delay(1000);
+    claw_open.set_value(true);
 }
 
 
@@ -99,7 +145,7 @@ void on_center_button() {
 	if (pressed) {
 		console.println("running autonomous");
 	} else {
-		
+		console.println("stopping autonomous");
 	}
 }
 
@@ -178,10 +224,46 @@ void autonomous() {
  */
 void opcontrol() {
 
+
     console.println("driver ctrl started");
 
+    bool claw_opened = false;
+    bool claw_downed = false;
+
 	while (true) {
-		// get left y and right x positions
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+        lift.move(127);
+        } 
+        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+        lift.move(-127);
+        }  
+        else {
+        lift.move(0);
+        }
+
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+            if (claw_opened) {
+                claw_open.set_value(false);
+                claw_opened = false;
+            } 
+            else {
+                claw_open.set_value(true);
+                claw_opened = true;
+            }
+        }
+
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+            if (claw_downed) {
+                claw_down.set_value(false);
+                claw_downed = false;
+            } 
+            else {
+                claw_down.set_value(true);
+                claw_downed = true;
+            }
+        }
+        
+        // get left y and right x positions
         int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
