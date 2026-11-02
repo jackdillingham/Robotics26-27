@@ -7,20 +7,21 @@
 ///
 
 // drive
-#define BRD_PORT 2
-#define MRD_PORT 3
-#define FRD_PORT 4
-#define BLD_PORT -5
-#define MLD_PORT -6
-#define FLD_PORT -7
+#define BRD_PORT -2
+#define MRD_PORT -3
+#define FRD_PORT -4
+#define BLD_PORT 5
+#define MLD_PORT 6
+#define FLD_PORT 7
 
 // lift
-#define LIFTL_PORT 11
-#define LIFTR_PORT 11
+#define LIFTL_PORT -16
+#define LIFTR_PORT 1
+#define LIFT_ROTATION_PORT 15
 
 // odom
-#define H_ODOM_PORT 16
-#define V_ODOM_PORT 15
+#define H_ODOM_PORT 19
+#define V_ODOM_PORT 18
 
 // intake
 #define INTAKE_PORT 17  // NOT CODED
@@ -58,9 +59,9 @@ pros::Rotation horizontal_encoder(H_ODOM_PORT);
 pros::Rotation vertical_encoder(V_ODOM_PORT);
 
 // horizontal tracking wheel
-lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_275, -5.75);
+lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, -0.5);
 // vertical tracking wheel
-lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_275, -2.5);
+lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_275, 0);
 
 // odometry settings
 lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel 1, set to null
@@ -101,20 +102,13 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
                         sensors // odometry sensors
 );
 
-pros::MotorGroup lift({LIFTL_PORT, LIFTR_PORT}, pros::MotorGears::red);
-
 pros::Distance distFront(12);
 pros::Distance distBack(13);
 pros::Distance distLeft(14);
-pros::Distance distRight(18);
-
-pros::adi::DigitalOut claw_open(CLAW_OPEN_PORT, false);
-pros::adi::DigitalOut claw_down(CLAW_DOWN_PORT, false);
-
-
-
+pros::Distance distRight(20);
 
 rd::Selector selector({
+    {"Testing Auto", Autons::TestAuto, "", 60},
     {"Red Right", Autons::RedRight, "", 0},
     {"Red Left", Autons::RedLeft, "", 0},
     {"Blue Right", Autons::BlueRight, "", 220},
@@ -125,11 +119,8 @@ rd::Selector selector({
 rd::Console console;
 
 void run_selected_auto(lv_event_t *) {
-    //selector.run_auton();
-
-    claw_open.set_value(false);
-    pros::delay(1000);
-    claw_open.set_value(true);
+    Autons::TestAuto();
+    console.println("auto ran");
 }
 
 
@@ -159,6 +150,11 @@ void on_center_button() {
 void initialize() {
 	//pros::lcd::initialize();
 	//pros::lcd::set_text(1, "Hello PROS User!");
+
+    initialize_systems(LIFTL_PORT, LIFTR_PORT, LIFT_ROTATION_PORT, CLAW_OPEN_PORT, CLAW_DOWN_PORT);
+    if (!reset_lift_rotation()) {
+        console.println("lift rotation reset failed");
+    }
 
 	pros::lcd::register_btn1_cb(on_center_button);
 
@@ -227,41 +223,8 @@ void opcontrol() {
 
     console.println("driver ctrl started");
 
-    bool claw_opened = false;
-    bool claw_downed = false;
-
 	while (true) {
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-        lift.move(127);
-        } 
-        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-        lift.move(-127);
-        }  
-        else {
-        lift.move(0);
-        }
-
-        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-            if (claw_opened) {
-                claw_open.set_value(false);
-                claw_opened = false;
-            } 
-            else {
-                claw_open.set_value(true);
-                claw_opened = true;
-            }
-        }
-
-        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-            if (claw_downed) {
-                claw_down.set_value(false);
-                claw_downed = false;
-            } 
-            else {
-                claw_down.set_value(true);
-                claw_downed = true;
-            }
-        }
+        lift_opcontrol();
         
         // get left y and right x positions
         int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);

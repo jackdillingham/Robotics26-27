@@ -13,12 +13,22 @@ const lemlib::Pose RL_START_POSE(0, 0, 0);
 const lemlib::Pose RR_START_POSE(0, 0, 0);
 const lemlib::Pose SKILLS_START_POSE(0, 0, 0);
 
+extern rd::Console console;
 
 
 
 ///
 // START AUTOS 
 ///
+
+bool isliftup = false;
+void Autons::TestAuto() {
+    const double targetHeight = isliftup ? 6.5 : 20.0;
+    if (move_lift_to_height(targetHeight)) {
+        isliftup = !isliftup;
+        console.println("lift reached target");
+    }
+}
 
 void Autons::BlueLeft() {
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);

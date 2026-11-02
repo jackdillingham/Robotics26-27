@@ -21,6 +21,7 @@ namespace Autons {
 	 void RedLeft();
 	 void RedRight();
 	 void Skills();
+   void TestAuto();
 
 };
 

@@ -39,6 +39,7 @@
 
 #include "autons.hpp" // IWYU pragma: keep
 #include "localization.hpp" // IWYU pragma: keep
+#include "systems.hpp" // IWYU pragma: keep
 
 
 /**
