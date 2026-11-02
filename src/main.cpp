@@ -8,10 +8,10 @@
 
 // drive
 #define BRD_PORT -2
-#define MRD_PORT -3
-#define FRD_PORT -4
-#define BLD_PORT 5
-#define MLD_PORT 6
+#define MRD_PORT 3
+#define FRD_PORT 4
+#define BLD_PORT -5
+#define MLD_PORT -6
 #define FLD_PORT 7
 
 // lift
@@ -52,6 +52,7 @@ lemlib::Drivetrain drivetrain(&left_motor_group, // left motor group
 
 // imu
 pros::Imu imu(10);
+
 
 // horizontal tracking wheel encoder
 pros::Rotation horizontal_encoder(H_ODOM_PORT);
@@ -108,18 +109,19 @@ pros::Distance distLeft(14);
 pros::Distance distRight(20);
 
 rd::Selector selector({
-    {"Testing Auto", Autons::TestAuto, "", 60},
+    //{"Testing Auto", Autons::TestAuto, "", 60},
     {"Red Right", Autons::RedRight, "", 0},
-    {"Red Left", Autons::RedLeft, "", 0},
-    {"Blue Right", Autons::BlueRight, "", 220},
-    {"Blue Left", Autons::BlueLeft, "", 220},
-    {"Skills", Autons::Skills, "", 120}
+    //{"Red Left", Autons::RedLeft, "", 0},
+    //{"Blue Right", Autons::BlueRight, "", 220},
+    //{"Blue Left", Autons::BlueLeft, "", 220},
+    //{"Skills", Autons::Skills, "", 120}
 });
 
 rd::Console console;
 
 void run_selected_auto(lv_event_t *) {
-    Autons::TestAuto();
+    //Autons::TestAuto();
+    selector.run_auton();
     console.println("auto ran");
 }
 
@@ -151,8 +153,8 @@ void initialize() {
 	//pros::lcd::initialize();
 	//pros::lcd::set_text(1, "Hello PROS User!");
 
-    initialize_systems(LIFTL_PORT, LIFTR_PORT, LIFT_ROTATION_PORT, CLAW_OPEN_PORT, CLAW_DOWN_PORT);
-    if (!reset_lift_rotation()) {
+    lift::initialize_systems(LIFTL_PORT, LIFTR_PORT, LIFT_ROTATION_PORT, CLAW_OPEN_PORT, CLAW_DOWN_PORT);
+    if (!lift::reset_rotation()) {
         console.println("lift rotation reset failed");
     }
 
@@ -224,7 +226,7 @@ void opcontrol() {
     console.println("driver ctrl started");
 
 	while (true) {
-        lift_opcontrol();
+        lift::opcontrol();
         
         // get left y and right x positions
         int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);

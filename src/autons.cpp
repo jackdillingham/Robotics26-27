@@ -23,10 +23,10 @@ extern rd::Console console;
 
 bool isliftup = false;
 void Autons::TestAuto() {
-    const double targetHeight = isliftup ? 6.5 : 20.0;
-    if (move_lift_to_height(targetHeight)) {
+    const double targetHeight = isliftup ? 6.5 : 31.0;
+    if (lift::move_to_height(targetHeight)) {
         isliftup = !isliftup;
-        console.println("lift reached target");
+        console.println("lift move started");
     }
 }
 
@@ -43,10 +43,35 @@ void Autons::BlueLeft() {
 
 }
 
-void Autons::BlueRight() {}
+void Autons::BlueRight() {
+  chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
+  chassis.setPose(BR_START_POSE);
+
+  chassis.moveToPoint(0, 10, 4000);
+  chassis.waitUntilDone();
+}
 
 void Autons::RedLeft() {}
 
-void Autons::RedRight() {}
+void Autons::RedRight() {
+  chassis.setPose(RR_START_POSE);
+  chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
+
+  chassis.moveToPoint(0, 28, 2000);
+  lift::up();
+  lift::close();
+  lift::move_to_height(14);
+  chassis.waitUntilDone();
+
+  lift::move_to_height(7, 40);
+  lift::wait_until_done();
+
+  lift::open();
+  pros::delay(100);
+  
+  chassis.moveToPose(0, 20, 0, 4000, {.forwards=false, .maxSpeed=SLOW_SPEED});
+  chassis.waitUntilDone();
+
+}
 
 void Autons::Skills() {}
