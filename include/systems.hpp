@@ -13,11 +13,23 @@ void open();
 void close();
 void up();
 void down();
+void moveUp();
+void moveDown();
 void toggle_claw_up_down();
 void toggle_claw_open_closed();
 void hold();
 void coast();
 void run_claw_test();
+
+}
+
+namespace intake {
+
+void initialize(int port);
+void forward(unsigned int speed);
+void reverse(unsigned int speed);
+void stop();
+void opcontrol();
 
 }
 

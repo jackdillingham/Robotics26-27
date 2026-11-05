@@ -19,6 +19,7 @@ static bool lift_rotation_zeroed = false;
 static bool lift_manual_active = false;
 static std::atomic<bool> lift_move_active{false};
 static pros::Mutex claw_mutex;
+static std::unique_ptr<pros::Motor> intake_motor;
 
 namespace lift {
 
@@ -253,18 +254,42 @@ void close() {
 }
 
 void up() {
-    if (!lift_motors || lift_move_active.load()) {
+    if (!claw_mutex.take()) {
+        console.println("claw up failed: could not lock claw controls");
         return;
     }
-    lift_motors->move(127);
-    lift_manual_active = true;
+    if (!lift_move_active.load() && claw_down) {
+        claw_downed = false;
+        claw_down->set_value(false);
+    }
+    claw_mutex.give();
 }
 
 void down() {
+    if (!claw_mutex.take()) {
+        console.println("claw down failed: could not lock claw controls");
+        return;
+    }
+    if (!lift_move_active.load() && claw_down) {
+        claw_downed = true;
+        claw_down->set_value(true);
+    }
+    claw_mutex.give();
+}
+
+void moveUp() {
     if (!lift_motors || lift_move_active.load()) {
         return;
     }
-    lift_motors->move(-127);
+    lift_motors->move(60);
+    lift_manual_active = true;
+}
+
+void moveDown() {
+    if (!lift_motors || lift_move_active.load()) {
+        return;
+    }
+    lift_motors->move(-60);
     lift_manual_active = true;
 }
 
@@ -300,9 +325,9 @@ void toggle_claw_open_closed() {
 
 void opcontrol() {
     if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-        up();
+        moveDown();
     } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-        down();
+        moveUp();
     } else {
         if (lift_manual_active) {
             hold();
@@ -311,8 +336,8 @@ void opcontrol() {
 
     static bool previousA = false;
     static bool previousB = false;
-    const bool buttonA = master.get_digital(pros::E_CONTROLLER_DIGITAL_A);
-    const bool buttonB = master.get_digital(pros::E_CONTROLLER_DIGITAL_B);
+    const bool buttonA = master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT);
+    const bool buttonB = master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT);
     if (buttonA && !previousA) toggle_claw_open_closed();
     if (buttonB && !previousB) toggle_claw_up_down();
     previousA = buttonA;
@@ -329,6 +354,7 @@ void run_claw_test() {
         return;
     }
 
+    claw_opened = false;
     claw_open->set_value(false);
     claw_mutex.give();
     pros::delay(1000);
@@ -337,9 +363,58 @@ void run_claw_test() {
         return;
     }
     if (!lift_move_active.load() && claw_open) {
+        claw_opened = true;
         claw_open->set_value(true);
     }
     claw_mutex.give();
+}
+
+}
+
+namespace intake {
+
+void initialize(int port) {
+    intake_motor = std::make_unique<pros::Motor>(static_cast<std::int8_t>(port));
+}
+
+void forward(unsigned int speed) {
+    if (!intake_motor) {
+        console.println("intake forward failed: intake is not initialized");
+        return;
+    }
+    if (intake_motor->move(static_cast<std::int32_t>(std::min(speed, 127u))) == PROS_ERR) {
+        console.println("intake forward failed: motor command error");
+    }
+}
+
+void reverse(unsigned int speed) {
+    if (!intake_motor) {
+        console.println("intake reverse failed: intake is not initialized");
+        return;
+    }
+    if (intake_motor->move(-static_cast<std::int32_t>(std::min(speed, 127u))) == PROS_ERR) {
+        console.println("intake reverse failed: motor command error");
+    }
+}
+
+void stop() {
+    if (!intake_motor) {
+        console.println("intake stop failed: intake is not initialized");
+        return;
+    }
+    if (intake_motor->move(0) == PROS_ERR) {
+        console.println("intake stop failed: motor command error");
+    }
+}
+
+void opcontrol() {
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+        reverse(127);
+    } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+        forward(127);
+    } else {
+        stop();
+    }
 }
 
 }

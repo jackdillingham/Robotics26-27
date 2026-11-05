@@ -32,7 +32,7 @@ void Autons::TestAuto() {
 
 void Autons::BlueLeft() {
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
-    chassis.setPose(BL_START_POSE);
+    mcl.setPose(BL_START_POSE);
 
 
     chassis.moveToPoint(10, 10, 4000, {.maxSpeed=SLOW_SPEED});
@@ -45,7 +45,7 @@ void Autons::BlueLeft() {
 
 void Autons::BlueRight() {
   chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
-  chassis.setPose(BR_START_POSE);
+  mcl.setPose(BR_START_POSE);
 
   chassis.moveToPoint(0, 10, 4000);
   chassis.waitUntilDone();
@@ -54,10 +54,10 @@ void Autons::BlueRight() {
 void Autons::RedLeft() {}
 
 void Autons::RedRight() {
-  chassis.setPose(RR_START_POSE);
+  mcl.setPose(RR_START_POSE);
   chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 
-  chassis.moveToPoint(0, 28, 2000);
+  chassis.moveToPoint(0, 23, 2000, {.forwards=false});
   lift::up();
   lift::close();
   lift::move_to_height(14);
@@ -69,7 +69,7 @@ void Autons::RedRight() {
   lift::open();
   pros::delay(100);
   
-  chassis.moveToPose(0, 20, 0, 4000, {.forwards=false, .maxSpeed=SLOW_SPEED});
+  chassis.moveToPose(0, 8, 0, 4000, {.maxSpeed=SLOW_SPEED});
   chassis.waitUntilDone();
 
 }
