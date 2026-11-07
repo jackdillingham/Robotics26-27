@@ -39,15 +39,15 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 // left motor group
 pros::MotorGroup left_motor_group({BLD_PORT, MLD_PORT, FLD_PORT}, pros::MotorGears::blue);
 // right motor group
-pros::MotorGroup right_motor_group({BRD_PORT, MRD_PORT, FRD_PORT}, pros::MotorGears::blue);
+pros::MotorGroup right_motor_group({BRD_PORT, MRD_PORT, FRD_PORT}, pros::MotorGears::green);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motor_group, // left motor group
                               &right_motor_group, // right motor group
                               10, // 10 inch track width
-                              lemlib::Omniwheel::NEW_275, // using new 4" omnis
-                              450, // drivetrain rpm is 360
-                              8 // horizontal drift is 2 (for now)
+                              lemlib::Omniwheel::NEW_4, // using new 4" omnis
+                              360, // drivetrain rpm is 360
+                              2 // horizontal drift is 2 (for now)
 );
 
 // imu
@@ -60,7 +60,7 @@ pros::Rotation horizontal_encoder(H_ODOM_PORT);
 pros::Rotation vertical_encoder(V_ODOM_PORT);
 
 // horizontal tracking wheel
-lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, -0.5);
+lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, 0.5);
 // vertical tracking wheel
 lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_275, 0);
 
@@ -108,31 +108,10 @@ pros::Distance distBack(13);
 pros::Distance distLeft(14);
 pros::Distance distRight(20);
 
-///
-// MONTE CARLO LOCALIZATION
-///
-
-// PLACEHOLDERS ONLY: the 6-inch sensor offsets and 144-inch field size below
-// are invented values, NOT measurements of this robot or the Pinnacle field.
-// Replace them with measurements, then set this to true to use MCL in autos.
-constexpr bool MCL_GEOMETRY_CONFIGURED = false;
-
-// Each sensor entry is {sensor address, forward offset, right offset, heading}.
-// Offsets are inches from the odometry center to the sensor lens.
-// Heading is degrees clockwise from the FRONT OF THE ROBOT, not the field.
-localization::MCL mcl(chassis, {
-    {&distFront, 6, 0, 0}, // 6 inches forward, points forward.
-    {&distBack, -6, 0, 180}, // 6 inches behind center, points backward.
-    {&distLeft, 0, -6, -90}, // 6 inches left of center, points left.
-    {&distRight, 0, 6, 90}, // 6 inches right of center, points right.
-}, {144, 144}); // Field width/height in inches, centered at (0, 0) like our auto poses.
-// Optional fourth argument: localization::Config with the filter tuning settings.
-// See include/mcl.hpp for what each setting does and troubleshooting steps.
-
 rd::Selector selector({
-    //{"Testing Auto", Autons::TestAuto, "", 60},
+    {"Testing Auto", Autons::TestAuto, "", 60},
     {"Red Right", Autons::RedRight, "", 0},
-    //{"Red Left", Autons::RedLeft, "", 0},
+    {"Red Left", Autons::RedLeft, "", 0}
     //{"Blue Right", Autons::BlueRight, "", 220},
     //{"Blue Left", Autons::BlueLeft, "", 220},
     //{"Skills", Autons::Skills, "", 120}
@@ -142,9 +121,7 @@ rd::Console console;
 
 void run_selected_auto(lv_event_t *) {
     //Autons::TestAuto();
-    if (MCL_GEOMETRY_CONFIGURED) mcl.enable();
     selector.run_auton();
-    mcl.disable();
     console.println("auto ran");
 }
 
@@ -176,15 +153,14 @@ void initialize() {
 	//pros::lcd::initialize();
 	//pros::lcd::set_text(1, "Hello PROS User!");
   //
-    chassis.calibrate();
-    mcl.start(); // Persistent task; corrections enabled only for autonomous.
-
-    lift::initialize_systems(LIFTL_PORT, LIFTR_PORT, LIFT_ROTATION_PORT, CLAW_OPEN_PORT, CLAW_DOWN_PORT);
-    lift::close();
-    intake::initialize(INTAKE_PORT);
-    if (!lift::reset_rotation()) {
-        console.println("lift rotation reset failed");
-    }
+  chassis.calibrate();
+  lift::initialize_systems(LIFTL_PORT, LIFTR_PORT, LIFT_ROTATION_PORT, CLAW_OPEN_PORT, CLAW_DOWN_PORT);
+  lift::close();
+  lift::up();
+  intake::initialize(INTAKE_PORT);
+  if (!lift::reset_rotation()) {
+    console.println("lift rotation reset failed");
+  }
 
 	pros::lcd::register_btn1_cb(on_center_button);
 
@@ -203,7 +179,7 @@ void initialize() {
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() { mcl.disable(); }
+void disabled() {}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -231,9 +207,7 @@ void competition_initialize() {
  */
 void autonomous() {
 
-    if (MCL_GEOMETRY_CONFIGURED) mcl.enable();
     selector.run_auton();
-    mcl.disable();
 
 }
 
@@ -252,8 +226,8 @@ void autonomous() {
  */
 void opcontrol() {
 
-
-    mcl.disable();
+    lift::up();
+    lift::close();
     console.println("driver ctrl started");
 
 	while (true) {

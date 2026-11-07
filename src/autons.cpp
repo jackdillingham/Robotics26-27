@@ -9,8 +9,8 @@
 
 const lemlib::Pose BL_START_POSE(60.5, -58.75, 270);
 const lemlib::Pose BR_START_POSE(0, 0, 0);
-const lemlib::Pose RL_START_POSE(0, 0, 0);
-const lemlib::Pose RR_START_POSE(0, 0, 0);
+const lemlib::Pose RL_START_POSE(49.75, -61.5, 90);
+const lemlib::Pose RR_START_POSE(49.75, 61.5, 90);
 const lemlib::Pose SKILLS_START_POSE(0, 0, 0);
 
 extern rd::Console console;
@@ -23,11 +23,8 @@ extern rd::Console console;
 
 bool isliftup = false;
 void Autons::TestAuto() {
-    const double targetHeight = isliftup ? 6.5 : 31.0;
-    if (lift::move_to_height(targetHeight)) {
-        isliftup = !isliftup;
-        console.println("lift move started");
-    }
+    lift::move_to_height(10);
+    lift::wait_until_done();
 }
 
 void Autons::BlueLeft() {
@@ -51,26 +48,58 @@ void Autons::BlueRight() {
   chassis.waitUntilDone();
 }
 
-void Autons::RedLeft() {}
-
-void Autons::RedRight() {
-  mcl.setPose(RR_START_POSE);
+void Autons::RedLeft() {
+  chassis.setPose(RL_START_POSE);
   chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 
-  chassis.moveToPoint(0, 23, 2000, {.forwards=false});
-  lift::up();
-  lift::close();
-  lift::move_to_height(14);
+  lift::move_to_height(10, 127);
+
+  chassis.moveToPose(27, -40, 0, 2500, {.forwards=false});
+  //lift::up();
+  //lift::close();
+  pros::delay(100);
   chassis.waitUntilDone();
 
   lift::move_to_height(7, 40);
-  lift::wait_until_done();
+  pros::delay(100);
 
   lift::open();
-  pros::delay(100);
+  //pros::delay(100);
+  //
+  lift::move_to_height(6.5, 127);
+  pros::delay(700);
   
-  chassis.moveToPose(0, 8, 0, 4000, {.maxSpeed=SLOW_SPEED});
+  //chassis.moveToPose(27, -64, 90, 4000, {.maxSpeed=SLOW_SPEED});
+  //chassis.waitUntilDone();
+
+
+}
+
+void Autons::RedRight() {
+  chassis.setPose(RR_START_POSE);
+  chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
+
+  lift::move_to_height(10, 127);
+
+  chassis.moveToPose(27, 40, 0, 2500, {.forwards=false});
+  //lift::up();
+  //lift::close();
+  pros::delay(100);
   chassis.waitUntilDone();
+
+  lift::move_to_height(7, 40);
+  pros::delay(100);
+
+  lift::open();
+  //pros::delay(100);
+  //
+  lift::move_to_height(6.5, 127);
+  pros::delay(700);
+  
+  //chassis.moveToPose(27, -64, 90, 4000, {.maxSpeed=SLOW_SPEED});
+  //chassis.waitUntilDone();
+
+
 
 }
 

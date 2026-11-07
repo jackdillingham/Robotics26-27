@@ -36,8 +36,8 @@ static bool set_claw_up_and_closed() {
 
     claw_opened = false;
     claw_downed = false;
-    claw_open->set_value(false);
-    claw_down->set_value(false);
+    claw_open->set_value(true);
+    claw_down->set_value(true);
     claw_mutex.give();
     return true;
 }
@@ -99,7 +99,7 @@ static bool run_to_angle(double targetAngle, int maxSpeed) {
 
     constexpr float kP = 7.0;
     constexpr float kI = 0.0;
-    constexpr float kD = 3.0;
+    constexpr float kD = 4.0;
     constexpr double positionTolerance = 3;
     constexpr uint32_t timeoutMs = 6000;
 
@@ -230,13 +230,15 @@ void wait_until_done() {
 }
 
 void open() {
-    if (!claw_mutex.take()) {
+  claw_open->set_value(false);
+  return;
+  if (!claw_mutex.take()) {
         console.println("claw open failed: could not lock claw controls");
         return;
     }
     if (!lift_move_active.load() && claw_open) {
         claw_opened = true;
-        claw_open->set_value(true);
+        claw_open->set_value(false);
     }
     claw_mutex.give();
 }
@@ -248,7 +250,7 @@ void close() {
     }
     if (!lift_move_active.load() && claw_open) {
         claw_opened = false;
-        claw_open->set_value(false);
+        claw_open->set_value(true);
     }
     claw_mutex.give();
 }
@@ -260,7 +262,7 @@ void up() {
     }
     if (!lift_move_active.load() && claw_down) {
         claw_downed = false;
-        claw_down->set_value(false);
+        claw_down->set_value(true);
     }
     claw_mutex.give();
 }
@@ -272,7 +274,7 @@ void down() {
     }
     if (!lift_move_active.load() && claw_down) {
         claw_downed = true;
-        claw_down->set_value(true);
+        claw_down->set_value(false);
     }
     claw_mutex.give();
 }
@@ -281,7 +283,7 @@ void moveUp() {
     if (!lift_motors || lift_move_active.load()) {
         return;
     }
-    lift_motors->move(60);
+    lift_motors->move(70);
     lift_manual_active = true;
 }
 
@@ -289,7 +291,7 @@ void moveDown() {
     if (!lift_motors || lift_move_active.load()) {
         return;
     }
-    lift_motors->move(-60);
+    lift_motors->move(-30);
     lift_manual_active = true;
 }
 
