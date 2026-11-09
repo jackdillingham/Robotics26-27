@@ -44,4 +44,7 @@ TEMPLATE_FILES=$(INCDIR)/$(LIBNAME)/*.h $(INCDIR)/$(LIBNAME)/*.hpp
 ################################################################################
 ################################################################################
 ########## Nothing below this line should be edited by typical users ###########
+# LemLib's cold archive already exports the template example's size symbol.
+# Keep the unused sample file, but do not embed it again in the hot package.
+override ASSET_FILES = $(filter-out static/example.txt,$(wildcard static/*) $(wildcard static.lib/*))
 -include ./common.mk

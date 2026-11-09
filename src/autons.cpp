@@ -23,13 +23,14 @@ extern rd::Console console;
 
 bool isliftup = false;
 void Autons::TestAuto() {
+    mcl.disable(); // Lift-only test has no known field starting pose.
     lift::move_to_height(10);
     lift::wait_until_done();
 }
 
 void Autons::BlueLeft() {
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
-    mcl.setPose(BL_START_POSE);
+    start_mcl_auton(BL_START_POSE);
 
 
     chassis.moveToPoint(10, 10, 4000, {.maxSpeed=SLOW_SPEED});
@@ -37,19 +38,20 @@ void Autons::BlueLeft() {
 
     chassis.moveToPose(20, 20, 180, 4000, {.maxSpeed=GAME_SPEED});
     chassis.waitUntilDone();
-
+    mcl.disable();
 }
 
 void Autons::BlueRight() {
   chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
-  mcl.setPose(BR_START_POSE);
+  start_mcl_auton(BR_START_POSE);
 
   chassis.moveToPoint(0, 10, 4000);
   chassis.waitUntilDone();
+  mcl.disable();
 }
 
 void Autons::RedLeft() {
-  chassis.setPose(RL_START_POSE);
+  start_mcl_auton(RL_START_POSE);
   chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 
   lift::move_to_height(10, 127);
@@ -68,6 +70,7 @@ void Autons::RedLeft() {
   //
   lift::move_to_height(6.5, 127);
   pros::delay(700);
+  mcl.disable();
   
   //chassis.moveToPose(27, -64, 90, 4000, {.maxSpeed=SLOW_SPEED});
   //chassis.waitUntilDone();
@@ -76,7 +79,7 @@ void Autons::RedLeft() {
 }
 
 void Autons::RedRight() {
-  chassis.setPose(RR_START_POSE);
+  start_mcl_auton(RR_START_POSE);
   chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 
   lift::move_to_height(10, 127);
@@ -95,6 +98,7 @@ void Autons::RedRight() {
   //
   lift::move_to_height(6.5, 127);
   pros::delay(700);
+  mcl.disable();
   
   //chassis.moveToPose(27, -64, 90, 4000, {.maxSpeed=SLOW_SPEED});
   //chassis.waitUntilDone();
@@ -103,4 +107,4 @@ void Autons::RedRight() {
 
 }
 
-void Autons::Skills() {}
+void Autons::Skills() { mcl.disable(); }

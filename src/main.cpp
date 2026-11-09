@@ -108,6 +108,25 @@ pros::Distance distBack(13);
 pros::Distance distLeft(14);
 pros::Distance distRight(20);
 
+constexpr bool MCL_METAL_PERIMETER = true;
+constexpr double MCL_FIELD_SIDE = MCL_METAL_PERIMETER ? 140.50 : 140.40;
+// PLACEHOLDER OFFSETS BELOW: measure lens forward/right from the odometry center
+// and verify all four facing angles before changing this flag to true.
+constexpr bool MCL_GEOMETRY_CONFIGURED = false;
+localization::MCL mcl(chassis, {
+    {&distFront, 0, 0,   0}, // PLACEHOLDER forward/right; front-facing
+    {&distBack,  0, 0, 180}, // PLACEHOLDER forward/right; rear-facing
+    {&distLeft,  0, 0, 270}, // PLACEHOLDER forward/right; left-facing
+    {&distRight, 0, 0,  90}  // PLACEHOLDER forward/right; right-facing
+}, {MCL_FIELD_SIDE, MCL_FIELD_SIDE, 0, 0}); // Origin at field center.
+
+// Used by both competition autonomous and RoboDash's direct routine calls.
+void start_mcl_auton(lemlib::Pose startPose) {
+    mcl.disable();
+    mcl.setPose(startPose); // Reset LemLib and the particle baseline together.
+    if (MCL_GEOMETRY_CONFIGURED) mcl.enable();
+}
+
 rd::Selector selector({
     {"Testing Auto", Autons::TestAuto, "", 60},
     {"Red Right", Autons::RedRight, "", 0},
@@ -154,6 +173,8 @@ void initialize() {
 	//pros::lcd::set_text(1, "Hello PROS User!");
   //
   chassis.calibrate();
+  mcl.start(); // Background task starts once; corrections enabled per auton.
+  if (!MCL_GEOMETRY_CONFIGURED) console.println("MCL disabled: sensor offsets are placeholders");
   lift::initialize_systems(LIFTL_PORT, LIFTR_PORT, LIFT_ROTATION_PORT, CLAW_OPEN_PORT, CLAW_DOWN_PORT);
   lift::close();
   lift::up();
@@ -179,7 +200,7 @@ void initialize() {
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() {}
+void disabled() { mcl.disable(); }
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -225,6 +246,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+    mcl.disable();
 
     lift::up();
     lift::close();

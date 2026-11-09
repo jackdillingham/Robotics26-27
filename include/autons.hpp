@@ -4,6 +4,7 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 
 void pid_setup();
+void start_mcl_auton(lemlib::Pose startPose);
 
 extern lemlib::Chassis chassis;
 
