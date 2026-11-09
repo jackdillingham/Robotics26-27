@@ -114,10 +114,10 @@ constexpr double MCL_FIELD_SIDE = MCL_METAL_PERIMETER ? 140.50 : 140.40;
 // and verify all four facing angles before changing this flag to true.
 constexpr bool MCL_GEOMETRY_CONFIGURED = false;
 localization::MCL mcl(chassis, {
-    {&distFront, 0, 0,   0}, // PLACEHOLDER forward/right; front-facing
-    {&distBack,  0, 0, 180}, // PLACEHOLDER forward/right; rear-facing
-    {&distLeft,  0, 0, 270}, // PLACEHOLDER forward/right; left-facing
-    {&distRight, 0, 0,  90}  // PLACEHOLDER forward/right; right-facing
+    {&distFront, -4, 6.25,   0}, // PLACEHOLDER forward/right; front-facing
+    {&distBack,  4.125, -7, 180}, // PLACEHOLDER forward/right; rear-facing
+    {&distLeft,  -6.5, -2.25, 270}, // PLACEHOLDER forward/right; left-facing
+    {&distRight, 6.5, -2.25,  90}  // PLACEHOLDER forward/right; right-facing
 }, {MCL_FIELD_SIDE, MCL_FIELD_SIDE, 0, 0}); // Origin at field center.
 
 // Used by both competition autonomous and RoboDash's direct routine calls.
