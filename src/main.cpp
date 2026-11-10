@@ -227,8 +227,21 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
+  
+  mcl.enable();
 
-    selector.run_auton();
+  lemlib::Pose startPoseTest(23, 23, 0);
+  mcl.setPose(startPoseTest);
+
+  while (true) {
+    console.clear();
+
+    lemlib::Pose currentPose = chassis.getPose();
+    console.printf("The robot's position is x:%f, y:%f, theta:%f\n", currentPose.x, currentPose.y, currentPose.theta);
+    pros::delay(10);
+  }
+
+  //selector.run_auton();
 
 }
 
