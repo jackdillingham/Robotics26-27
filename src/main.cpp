@@ -108,7 +108,7 @@ pros::Distance distBack(13);
 pros::Distance distLeft(14);
 pros::Distance distRight(20);
 
-constexpr bool MCL_METAL_PERIMETER = true;
+constexpr bool MCL_METAL_PERIMETER = false;
 constexpr double MCL_FIELD_SIDE = MCL_METAL_PERIMETER ? 140.50 : 140.40;
 // PLACEHOLDER OFFSETS BELOW: measure lens forward/right from the odometry center
 // and verify all four facing angles before changing this flag to true.
