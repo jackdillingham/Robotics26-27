@@ -118,45 +118,46 @@ void Autons::Skills() {
   
   start_mcl_auton(SKILLS_START_POSE);
   
-  // Movement 1: Score prelaod
-  chassis.turnToHeading(270.000, 2000, {}, false);
-  chassis.follow(pinnacle_01_txt, 10, 6022, false, true);
-  chassis.waitUntil(1.5109); // Lift to 10in
-  lift::move_to_height(10, 127);
-  chassis.waitUntil(28.7080); // Score preload and return lift
-  lift::move_to_height(6.5, 40);
-  pros::delay(400);
-  lift::open();
-  pros::delay(200);
-  chassis.waitUntilDone();
-  chassis.turnToHeading(0.000, 2000, {}, false);
+//chassis.setPose(-57.4000, 58.5000, 270.000);
+// Movement 1: Score prelaod
+chassis.turnToHeading(270.000, 2000, {}, false);
+chassis.follow(pinnacle_01_txt, 10, 6022, false, true);
+chassis.waitUntil(1.5109); // Lift to 10in
+lift::move_to_height(10, 127);
+chassis.waitUntil(28.7080); // Score preload and return lift
+lift::move_to_height(6.5, 40);
+pros::delay(400);
+lift::open();
+pros::delay(200);
+chassis.waitUntilDone();
+chassis.turnToHeading(0.000, 2000, {}, false);
 
-  // Movement 2: Turn around
-  chassis.turnToHeading(0.000, 2000, {}, false);
-  chassis.follow(pinnacle_02_txt, 10, 6107, true, true);
-  chassis.waitUntilDone();
-  chassis.turnToHeading(90.000, 2000, {}, false);
+// Movement 2: Turn around
+chassis.turnToHeading(0.000, 2000, {}, false);
+chassis.follow(pinnacle_02_txt, 10, 6107, true, true);
+chassis.waitUntilDone();
+chassis.turnToHeading(90.000, 2000, {}, false);
 
-  // Movement 3: Matchload
-  chassis.turnToHeading(90.000, 2000, {}, false);
-  chassis.follow(pinnacle_03_txt, 10, 5700, false, true);
-  chassis.waitUntil(0.0000); // Grab matchload
-  lift::close();
-  chassis.waitUntilDone();
+// Movement 3: Matchload
+chassis.turnToHeading(90.000, 2000, {}, false);
+chassis.follow(pinnacle_03_txt, 10, 5700, false, true);
+chassis.waitUntil(0.0000); // Grab matchload
+lift::close();
+chassis.waitUntilDone();
 
-  // Movement 4: Move towards center and turn around
-  chassis.turnToHeading(90.000, 2000, {}, false);
-  chassis.follow(pinnacle_04_txt, 10, 13409, true, true);
-  chassis.waitUntilDone();
+// Movement 4: Move towards center and turn around
+chassis.turnToHeading(90.000, 2000, {}, false);
+chassis.follow(pinnacle_04_txt, 10, 13409, true, true);
+chassis.waitUntilDone();
 
-  // Movement 5: Score matchload on center
-  chassis.turnToHeading(270.000, 2000, {}, false);
-  chassis.follow(pinnacle_05_txt, 10, 5350, false, true);
-  chassis.waitUntil(0.0000); // Lift up 4 bar
-  lift::move_to_height(18, 127);
-  chassis.waitUntil(23.5000); // Intake on
-  lift::move_to_height(15, 40);
-  pros::delay(500);
-  lift::open();
-  chassis.waitUntilDone();
+// Movement 5: Score matchload on center
+chassis.turnToHeading(270.000, 2000, {}, false);
+chassis.follow(pinnacle_05_txt, 10, 5350, false, true);
+chassis.waitUntil(0.0000); // Lift up 4 bar
+lift::move_to_height(18, 127);
+chassis.waitUntil(23.5000); // Intake on
+lift::move_to_height(15, 40);
+pros::delay(500);
+lift::open();
+chassis.waitUntilDone();
 }

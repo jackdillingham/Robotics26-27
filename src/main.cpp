@@ -60,9 +60,9 @@ pros::Rotation horizontal_encoder(H_ODOM_PORT);
 pros::Rotation vertical_encoder(V_ODOM_PORT);
 
 // horizontal tracking wheel
-lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, 0.5);
+lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, 1.982276, 0.5);
 // vertical tracking wheel
-lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_275, 0);
+lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, 1.982276, 0);
 
 // odometry settings
 lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel 1, set to null
@@ -272,7 +272,7 @@ void opcontrol() {
   //pros::delay(1000);
   //Autons::Skills();
 
-  while (false) {
+  while (true) {
     const auto pose = chassis.getPose();
     char line[80];
     std::snprintf(line, sizeof(line), "X: %.2f  Y: %.2f  H: %.1f",
@@ -280,11 +280,16 @@ void opcontrol() {
     console.clear();
     console.println(line);
     pros::delay(200);
+
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X) && master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+      Autons::Skills();
+      return;
+    }
   }
 
   //return;
 
-	while (true) {
+	while (false) {
         lift::opcontrol();
         intake::opcontrol();
         
