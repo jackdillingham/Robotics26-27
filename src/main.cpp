@@ -112,7 +112,7 @@ constexpr bool MCL_METAL_PERIMETER = false;
 constexpr double MCL_FIELD_SIDE = MCL_METAL_PERIMETER ? 140.50 : 140.40;
 // PLACEHOLDER OFFSETS BELOW: measure lens forward/right from the odometry center
 // and verify all four facing angles before changing this flag to true.
-constexpr bool MCL_GEOMETRY_CONFIGURED = false;
+constexpr bool MCL_GEOMETRY_CONFIGURED = true;
 localization::MCL mcl(chassis, {
     {&distFront, -4, 6.25,   0}, // PLACEHOLDER forward/right; front-facing
     {&distBack,  4.125, -7, 180}, // PLACEHOLDER forward/right; rear-facing
@@ -130,10 +130,10 @@ void start_mcl_auton(lemlib::Pose startPose) {
 rd::Selector selector({
     {"Testing Auto", Autons::TestAuto, "", 60},
     {"Red Right", Autons::RedRight, "", 0},
-    {"Red Left", Autons::RedLeft, "", 0}
+    {"Red Left", Autons::RedLeft, "", 0},
     //{"Blue Right", Autons::BlueRight, "", 220},
     //{"Blue Left", Autons::BlueLeft, "", 220},
-    //{"Skills", Autons::Skills, "", 120}
+    {"Skills", Autons::Skills, "", 120}
 });
 
 rd::Console console;
@@ -151,13 +151,14 @@ void run_selected_auto(lv_event_t *) {
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
+bool centerPressed = false;
 void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
+	//centerPressed = !centerPressed;
+	if (centerPressed) {
 		console.println("running autonomous");
-	} else {
-		console.println("stopping autonomous");
+		Autons::Skills();
+    centerPressed = true;
+    
 	}
 }
 
@@ -259,11 +260,29 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-    mcl.disable();
+  //mcl.disable();
+  lemlib::Pose startPoseTest(0,0,0);
+  start_mcl_auton(startPoseTest);
 
-    lift::up();
-    lift::close();
-    console.println("driver ctrl started");
+  lift::up();
+  lift::close();
+
+  //console.println("driver ctrl started");
+
+  //pros::delay(1000);
+  //Autons::Skills();
+
+  while (false) {
+    const auto pose = chassis.getPose();
+    char line[80];
+    std::snprintf(line, sizeof(line), "X: %.2f  Y: %.2f  H: %.1f",
+                  pose.x, pose.y, pose.theta);
+    console.clear();
+    console.println(line);
+    pros::delay(200);
+  }
+
+  //return;
 
 	while (true) {
         lift::opcontrol();
