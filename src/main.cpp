@@ -128,7 +128,7 @@ void start_mcl_auton(lemlib::Pose startPose) {
 }
 
 rd::Selector selector({
-    {"Testing Auto", Autons::TestAuto, "", 60},
+    //{"Testing Auto", Autons::TestAuto, "", 60},
     {"Red Right", Autons::RedRight, "", 0},
     {"Red Left", Autons::RedLeft, "", 0},
     //{"Blue Right", Autons::BlueRight, "", 220},
@@ -231,10 +231,12 @@ void autonomous() {
   
   mcl.enable();
 
-  lemlib::Pose startPoseTest(23, 23, 0);
-  mcl.setPose(startPoseTest);
+  selector.run_auton();
 
-  while (true) {
+  //lemlib::Pose startPoseTest(23, 23, 0);
+  //mcl.setPose(startPoseTest);
+
+  while (false) {
     console.clear();
 
     lemlib::Pose currentPose = chassis.getPose();
@@ -272,7 +274,7 @@ void opcontrol() {
   //pros::delay(1000);
   //Autons::Skills();
 
-  while (true) {
+  while (false) {
     const auto pose = chassis.getPose();
     char line[80];
     std::snprintf(line, sizeof(line), "X: %.2f  Y: %.2f  H: %.1f",
@@ -289,7 +291,7 @@ void opcontrol() {
 
   //return;
 
-	while (false) {
+	while (true) {
         lift::opcontrol();
         intake::opcontrol();
         
