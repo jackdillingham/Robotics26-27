@@ -110,14 +110,14 @@ pros::Distance distRight(20);
 
 constexpr bool MCL_METAL_PERIMETER = false;
 constexpr double MCL_FIELD_SIDE = MCL_METAL_PERIMETER ? 140.50 : 140.40;
-// PLACEHOLDER OFFSETS BELOW: measure lens forward/right from the odometry center
-// and verify all four facing angles before changing this flag to true.
+// Offsets are {forward, right} in inches from the odometry center to the lens.
+// Verify offsets and facing angles on the robot.
 constexpr bool MCL_GEOMETRY_CONFIGURED = true;
 localization::MCL mcl(chassis, {
-    {&distFront, -4, 6.25,   0}, // PLACEHOLDER forward/right; front-facing
-    {&distBack,  4.125, -7, 180}, // PLACEHOLDER forward/right; rear-facing
-    {&distLeft,  -6.5, -2.25, 270}, // PLACEHOLDER forward/right; left-facing
-    {&distRight, 6.5, -2.25,  90}  // PLACEHOLDER forward/right; right-facing
+    {&distFront, 6.25, -4,     0}, // front-facing
+    {&distBack,  -7, 4.125, 180}, // rear-facing
+    {&distLeft,  -2.25, -6.5, 270}, // left-facing
+    {&distRight, -2.25, 6.5,   90}  // right-facing
 }, {MCL_FIELD_SIDE, MCL_FIELD_SIDE, 0, 0}); // Origin at field center.
 
 // Used by both competition autonomous and RoboDash's direct routine calls.
