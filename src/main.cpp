@@ -60,9 +60,9 @@ pros::Rotation horizontal_encoder(H_ODOM_PORT);
 pros::Rotation vertical_encoder(V_ODOM_PORT);
 
 // horizontal tracking wheel
-lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, 1.982276, 0.5);
+lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, 2, 0.5);
 // vertical tracking wheel
-lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, 1.982276, 0);
+lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, 2, 0);
 
 // odometry settings
 lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel 1, set to null
@@ -73,8 +73,8 @@ lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
 );
 
 // lateral PID controller
-lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
-                                              0, // integral gain (kI)
+lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
+                                              1, // integral gain (kI)
                                               3, // derivative gain (kD)
                                               3, // anti windup
                                               1, // small error range, in inches
@@ -274,21 +274,6 @@ void opcontrol() {
   //pros::delay(1000);
   //Autons::Skills();
 
-  while (false) {
-    const auto pose = chassis.getPose();
-    char line[80];
-    std::snprintf(line, sizeof(line), "X: %.2f  Y: %.2f  H: %.1f",
-                  pose.x, pose.y, pose.theta);
-    console.clear();
-    console.println(line);
-    pros::delay(200);
-
-    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X) && master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
-      Autons::Skills();
-      return;
-    }
-  }
-
   //return;
 
 	while (true) {
@@ -301,6 +286,19 @@ void opcontrol() {
 
         // move the robot
         chassis.tank(leftY, rightY);
+
+        const auto pose = chassis.getPose();
+        char line[80];
+        std::snprintf(line, sizeof(line), "X: %.2f  Y: %.2f  H: %.1f",
+                      pose.x, pose.y, pose.theta);
+        console.clear();
+        console.println(line);
+        pros::delay(200);
+
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X) && master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+          Autons::Skills();
+          return;
+        }
 
         // delay to save resources
         pros::delay(25); // Run for 20 ms then update
