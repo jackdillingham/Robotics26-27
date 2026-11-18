@@ -132,5 +132,5 @@ void Autons::Skills() {
   lift::move_to_height(6.5, 127);
   pros::delay(500);
   lift::open();
-  pros::delay(4000)
+  pros::delay(4000);
 }
